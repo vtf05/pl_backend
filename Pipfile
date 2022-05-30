@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+django-restframework = "*"
+djangorestframework = "*"
+pillow = "*"
+django-cors-headers = "==3.10.0"
+install = "*"
+pyotp = "*"
+razorpay = "*"
+django-filter = "*"
+django-phonenumber-field = "*"
+django-phonenumbers = "*"
+drfpasswordless = "*"
+twilio = "*"
+django-environ = "*"
+django-rest-swagger = "*"
+drf-yasg = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
