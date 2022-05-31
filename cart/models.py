@@ -15,5 +15,6 @@ class Cart(models.Model) :
     price       = models.IntegerField(default = 0, null = True ,blank= True)
     proccessed  = models.BooleanField(default = False , null = True , blank=True)
     cashback    = models.IntegerField(default = 0, null = True ,blank= True)
+    paid        = models.BooleanField( default = False , null = True , blank=True)
 
 # Create your models here.
