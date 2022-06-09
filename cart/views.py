@@ -30,12 +30,11 @@ class CartViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='add_item', url_name='add_item')
     def add_to_cart(self,request ,pk=None,*args, **kwargs):
-        cart_id = request.query_params['cart_id']
-        if cart_id != "null":
-            queryset    = Cart.objects.all()
-            cart        = get_object_or_404(queryset, pk=cart_id)
-        else :
-            cart = Cart.objects.create(user=request.user)
+        try :
+            cart = Cart.objects.get(user=request.user,paid=False)
+        except :
+             cart = Cart.objects.create(user=request.user)
+        cart = Cart.objects.get(user=request.user,paid=False)
 
         item_id     = request.query_params['item_id']
         item        = Item.objects.get(id = item_id)
@@ -47,19 +46,27 @@ class CartViewSet(viewsets.ModelViewSet):
         return Response(message , status=status.HTTP_202_ACCEPTED)
 
 
-    @action(detail=True, methods=['post'], url_path='get_cart', url_name='get_cart')
+
+    @action(detail=False, methods=['get'], url_path='get_mycart', url_name='get_mycart')
     def get_cart(self,request,pk=None,*args , **kwargs)   :
         user = request.user
-        carts = Cart.objects.filter(user=user,proccessed = False)
+        carts = Cart.objects.filter(user=user,proccessed = False,paid=False)
+        if len(carts)==0 :
+            carts = Cart.objects.create(user=user)
         serializer = self.get_serializer(carts, many=True)
         return Response(serializer.data , status=status.HTTP_200_OK)
     
 
 
-    @action(detail=True, methods=['post'] , url_path='remove_item', url_name='remove_item')
+    @action(detail=False, methods=['post'] , url_path='remove_item', url_name='remove_item')
     def remove_from_cart(self,request ,pk=None,*args, **kwargs):
-        queryset    = Cart.objects.all()
-        cart        = get_object_or_404(queryset, pk=pk)
+        cart_id = request.query_params['cart_id']
+
+        if cart_id != "null":
+            queryset    = Cart.objects.all()
+            cart        = get_object_or_404(queryset, pk=cart_id)
+        else :
+            pass
         item_id     = request.query_params['item_id']
         item        = Item.objects.get(id = item_id)
         item_price  = item.price

@@ -15,5 +15,6 @@ class Payment(models.Model):
     payment_id          = models.CharField(max_length=100)
     isPaid              = models.BooleanField(default=False)
     payment_date        = models.DateTimeField(auto_now=True)
+    payment_type        = models.CharField(max_length=5)
 
         

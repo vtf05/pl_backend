@@ -31,8 +31,7 @@ SECRET_KEY = 'django-insecure-aa2dum&cp))9r&bbu=luwm$4&xf_shtpoc5olol5@q53!)2rqq
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-with open(r'C:\Users\Avinash vishwakarma\Desktop\Internship folder\pl_backend\config.json') as config_file :
-    config = json.load(config_file)
+
 
 ALLOWED_HOSTS = ["localhost","127.0.0.1"]
 
@@ -84,8 +83,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                # 'social_django.context_processors.backends',
+                # 'social_django.context_processors.login_redirect',
             ],
         },
     },

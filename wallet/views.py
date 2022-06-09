@@ -56,7 +56,7 @@ def start_payment(request):
     # request.data is coming from frontend
     amount = request.data['ammount']
     name = request.data['user']
-
+    payment_type = request.data['payment_type']
     # setup razorpay client this is the client to whome user is paying money that's you
       
     #client = razorpay.Client(auth=(env('PUBLIC_KEY'), env('SECRET_KEY')))
@@ -75,7 +75,8 @@ def start_payment(request):
     payment_obj = Payment.objects.create(user = request.user, # we need to decide what it should be 
                                         payment_amount=amount, 
                                         payment_id=payment['id'],
-                                        payment_date = datetime.datetime.now() )
+                                        payment_date = datetime.datetime.now() ,
+                                        payment_type = payment_type)
  
     serializer = PaymentSerializer(payment_obj)
 
@@ -130,23 +131,29 @@ def handle_payment_success(request):
         'razorpay_payment_id': raz_pay_id,
         'razorpay_signature': raz_signature
     }
-
+    print(data)
     client = razorpay.Client(auth=(config['PUBLIC_KEY'], config['SECRET_KEY']))
-
     # checking if the transaction is valid or not by passing above data dictionary in 
     # razorpay client if it is "valid" then check will return None
     check = client.utility.verify_payment_signature(data)
+    print(data , check)
 
     if check is not None:
         print("Redirect to error url or error page")
         return Response({'error': 'Something went wrong'},status= status.HTTP_400_BAD_REQUEST)
 
     # if payment is successful that means check is None then we will turn isPaid=True
-    order.isPaid = True
-    user_wallet_obj = UserWallet.objects.get(user = order.user)
-    user_wallet_obj.cur_balance += order.amount # adding balance to the user account
-    user_wallet_obj.save()
-    order.save()
+    if order.payment_type == "cart":
+        cart = Cart.objects.filter(user = order.user , price = order.payment_amount , paid=False)
+        cart = cart[0]
+        cart.paid = True
+        cart.save()
+    else :    
+        order.isPaid = True
+        user_wallet_obj = UserWallet.objects.get(user = order.user)
+        user_wallet_obj.cur_balance += order.amount # adding balance to the user account
+        user_wallet_obj.save()
+        order.save()
 
     res_data = {
         'message': 'payment successfully received!'

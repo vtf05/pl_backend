@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer
 from django_filters import rest_framework as filters
+from rest_framework.parsers import JSONParser,MultiPartParser,FileUploadParser
+
 
 User = get_user_model()
 
@@ -17,6 +19,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset         =  User.objects.all()
     serializer_class =  UserSerializer
+
     # filter_backends  =  (filters.DjangoFilterBackend,)
     # filterset_fields =  ('mobile', 'username',)
 
