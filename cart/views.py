@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from .serializers import ItemSerializer ,CartSerializer
-from .models import Item , Cart 
+from .models import Item, Cart, Otp 
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
@@ -10,6 +10,14 @@ from django.shortcuts import get_list_or_404, get_object_or_404
 from django.db.models import Count,Max,Sum
 from rest_framework.permissions import IsAuthenticated
 from django_filters import rest_framework as filters
+import random as r
+
+# function for otp generation
+def otpgen():
+    otp=""
+    for i in range(4):
+        otp+=str(r.randint(1,9))
+    return otp
 
 
 
@@ -75,3 +83,25 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.save()
         message = {'msg': 'item removed successfully'}
         return Response(message , status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=['post'] , url_path='activate_cart_req', url_name='activate_cart_req')
+    def activate_cart_req(self, request, *args, **kwargs):
+        cart_id = request.query_params['cart_id']
+        otp = otpgen()
+        cart = Cart.object.get(id = cart_id)
+        otp_obj = Otp.objects.create(cart = cart, otp = otp)
+        message = {'msg': 'otp created successfully'}
+        return Response(message , status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=['post'] , url_path='activate_cart', url_name='activate_cart')
+    def activate_cart(self, request, *args, **kwargs):
+        cart_id = request.query_params['cart_id']
+        otp = request.query_params['otp']
+        otp_obj = Otp.objects.get(cart_id = cart_id)
+        if otp == otp_obj.otp :
+            message = {'msg': 'otp matched successfully'}
+            return Response(message , status=status.HTTP_202_ACCEPTED)
+        else :
+            message = {'msg': 'otp doesnt matched'}
+            return Response(message , status=status.HTTP_400_BAD_REQUEST)
+  

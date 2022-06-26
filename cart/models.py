@@ -12,9 +12,15 @@ class Item(models.Model):
 class Cart(models.Model) :
     user        = models.ForeignKey(User, on_delete=models.CASCADE)
     items       =  models.ManyToManyField(Item)
-    price       = models.IntegerField(default = 0, null = True ,blank= True)
-    proccessed  = models.BooleanField(default = False , null = True , blank=True)
-    cashback    = models.IntegerField(default = 0, null = True ,blank= True)
-    paid        = models.BooleanField( default = False , null = True , blank=True)
+    price       = models.IntegerField(default = 0, null = True, blank= True)
+    proccessed  = models.BooleanField(default = False , null = True, blank=True)
+    cashback    = models.IntegerField(default = 0, null = True,blank= True)
+    paid        = models.BooleanField( default = False , null = True, blank=True)
+
+class Otp(models.Model):
+    cart = models.ForeignKey(Cart, unique=True, on_delete=models.CASCADE)
+    otp  = models.IntegerField(default = 0, null = True, blank = True)
+    proceed = models.BooleanField( default = False , null = True, blank=True)
+
 
 # Create your models here.
