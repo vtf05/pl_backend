@@ -6,11 +6,15 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action ,api_view
 import datetime
+import time
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.db.models import Count,Max,Sum
 from rest_framework.permissions import IsAuthenticated
 from django_filters import rest_framework as filters
 import random as r
+#  for sending sms
+import os
+from twilio.rest import Client
 
 # function for otp generation
 def otpgen():
@@ -87,11 +91,36 @@ class CartViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'] , url_path='activate_cart_req', url_name='activate_cart_req')
     def activate_cart_req(self, request, *args, **kwargs):
         cart_id = request.query_params['cart_id']
-        otp = otpgen()
-        cart = Cart.object.get(id = cart_id)
-        otp_obj = Otp.objects.create(cart = cart, otp = otp)
-        message = {'msg': 'otp created successfully'}
-        return Response(message , status=status.HTTP_202_ACCEPTED)
+        cart = Cart.objects.get(id = cart_id)
+        account_sid = os.environ['TWILIO_ACCOUNT_SID']
+        auth_token = os.environ['TWILIO_AUTH_TOKEN']
+        client = Client(account_sid, auth_token)
+        try :
+            
+            otp_obj = Otp.objects.get(cart_id = cart.id)
+            message = {'msg': 'otp created successfully','otp':str(otp_obj.otp)}
+            # send message using twillio 
+            time.sleep(60)
+            msg = client.messages.create(
+                                    body='Hi there your otp is',
+                                    from_='"+19705332902',
+                                    to='+916265893640'
+                                )
+            return Response(message , status=status.HTTP_202_ACCEPTED)
+        except   :
+            print("i am here")
+            otp = otpgen()
+            otp_obj = Otp.objects.create(cart = cart, otp = otp)
+            message = {'msg': 'otp created successfully','otp':str(otp)}
+            time.sleep(60)
+            msg = client.messages.create(
+                                    body='Hi there your otp is',
+                                    from_='"+19705332902',
+                                    to='+916265893640'
+                                )
+            return Response(message , status=status.HTTP_202_ACCEPTED)
+
+
 
     @action(detail=False, methods=['post'] , url_path='activate_cart', url_name='activate_cart')
     def activate_cart(self, request, *args, **kwargs):
@@ -99,9 +128,14 @@ class CartViewSet(viewsets.ModelViewSet):
         otp = request.query_params['otp']
         otp_obj = Otp.objects.get(cart_id = cart_id)
         if otp == otp_obj.otp :
+            otp_obj.proceed = True
+            cart_obj = Cart.objects.get(id = cart_id)
+            cart_obj.proccessed = True
+            otp_obj.save()
+            cart_obj.save()
             message = {'msg': 'otp matched successfully'}
             return Response(message , status=status.HTTP_202_ACCEPTED)
         else :
-            message = {'msg': 'otp doesnt matched'}
+            message = {'msg': 'otp does matched'}
             return Response(message , status=status.HTTP_400_BAD_REQUEST)
   
