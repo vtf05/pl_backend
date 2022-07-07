@@ -10,7 +10,7 @@ router.register('transaction', PaymentViewSet)
 
 urlpatterns = [
     path('pay/', start_payment, name="payment"),
-    path('payment/success/', handle_payment_success, name="payment_success")
+    path('payment/success/', handle_payment_success)
 ]
 urlpatterns.extend(router.urls)
 
