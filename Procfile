@@ -1,0 +1,1 @@
+web: gunicorn pl_backend.wsgi
