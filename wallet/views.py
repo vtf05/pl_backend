@@ -16,8 +16,6 @@ from django_filters import rest_framework as filters
 import os
 
 
-with open(r'C:\Users\Avinash vishwakarma\Desktop\blog_config.json') as config_file:
-    config = json.load(config_file)
     
 ################## django api view ###################
 
