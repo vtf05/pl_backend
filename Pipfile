@@ -20,6 +20,7 @@ twilio = "*"
 django-environ = "*"
 django-rest-swagger = "*"
 drf-yasg = "*"
+gunicorn = "*"
 
 [dev-packages]
 

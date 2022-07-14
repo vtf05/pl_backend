@@ -1,10 +1,11 @@
 from rest_framework import viewsets
 from .serializers import ItemSerializer ,CartSerializer
-from .models import Item, Cart, Otp 
+from .models import Item, Cart, Otp ,CartItem
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import action ,api_view
+from wallet.models import UserWallet
 import datetime
 import time
 from django.shortcuts import get_list_or_404, get_object_or_404
@@ -45,15 +46,29 @@ class CartViewSet(viewsets.ModelViewSet):
         try :
             cart = Cart.objects.get(user=request.user,paid=False)
         except :
-             cart = Cart.objects.create(user=request.user)
-        cart = Cart.objects.get(user=request.user,paid=False)
-
+            cart = Cart.objects.create(user=request.user)
         item_id     = request.query_params['item_id']
-        item        = Item.objects.get(id = item_id)
+        item = Item.objects.get(id = item_id)
+        try :
+            cart_item = cart.items.all().filter(item__id = item_id)
+            if cart_item :
+                print("this phase run" ,cart_item[0], cart_item[0].count)
+                cart_item[0].count+=1 
+            else :
+                print("this phase run 2" ,cart_item)
+                cart_item = CartItem.objects.create(item = item, count=1)
+                cart.items.add(cart_item)
+
+        except :
+            cart_item = CartItem.objects.create(item = item,count=1)
+            print("this phase run 4" ,cart_item)
+            cart.items.add(cart_item)
+            cart_item = CartItem.objects.create(item = item)
+            cart.items.add(cart_item)
+
         item_price  = item.price
         cart.price  = cart.price+item_price
-        cart.items.add(item)
-        cart.save()
+        cart.save()    
         message = {'msg': 'item added successfully'}    
         return Response(message , status=status.HTTP_202_ACCEPTED)
 
@@ -62,7 +77,7 @@ class CartViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='get_mycart', url_name='get_mycart')
     def get_cart(self,request,pk=None,*args , **kwargs)   :
         user = request.user
-        carts = Cart.objects.filter(user=user,proccessed = False,paid=False)
+        carts = Cart.objects.filter(user=user, proccessed = False, paid=False)
         if len(carts)==0 :
             carts = Cart.objects.create(user=user)
         serializer = self.get_serializer(carts, many=True)
@@ -73,20 +88,31 @@ class CartViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'] , url_path='remove_item', url_name='remove_item')
     def remove_from_cart(self,request ,pk=None,*args, **kwargs):
         cart_id = request.query_params['cart_id']
-
         if cart_id != "null":
             queryset    = Cart.objects.all()
             cart        = get_object_or_404(queryset, pk=cart_id)
         else :
-            pass
-        item_id     = request.query_params['item_id']
+             return Response(status=status.HTTP_400_BAD_REQUEST)
+        try :        
+            item_id     = request.query_params['item_id']
+            cart_item = cart.items.all().filter(item__id = item_id)
+            if cart_item :
+                print("this phase run" ,cart_item[0], cart_item[0].count)
+                count = cart_item[0].count
+                if count == 1 :
+                    cart.items.remove(cart_item[0].id)
+                else :    
+                    cart_item[0].count-=1
+        except :
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         item        = Item.objects.get(id = item_id)
         item_price  = item.price
         cart.price  = cart.price-item_price
-        cart.items.remove(item)
         cart.save()
         message = {'msg': 'item removed successfully'}
         return Response(message , status=status.HTTP_202_ACCEPTED)
+
 
     @action(detail=False, methods=['post'] , url_path='activate_cart_req', url_name='activate_cart_req')
     def activate_cart_req(self, request, *args, **kwargs):
@@ -138,4 +164,14 @@ class CartViewSet(viewsets.ModelViewSet):
         else :
             message = {'msg': 'otp does matched'}
             return Response(message , status=status.HTTP_400_BAD_REQUEST)
-  
+
+    @action(detail=False, methods=['post'] , url_path='activate_cart', url_name='activate_cart')
+    def cancel_order(self, request, *args, **kwargs ):
+        cart_id = request.query_params['cart_id']
+        cart = cart.objects.get(id = cart_id)
+        cart_price = cart.price
+        wallet = UserWallet.objects.get(user__id=cart.user)
+        wallet.cur_balance  = wallet.cur_balance+cart_price
+        wallet.save()
+        cart.status = "canceld"
+        cart.save()
