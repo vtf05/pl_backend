@@ -13,6 +13,7 @@ import json
 import razorpay
 from rest_framework.permissions import IsAuthenticated
 from django_filters import rest_framework as filters
+import os
 
 
 with open(r'C:\Users\Avinash vishwakarma\Desktop\blog_config.json') as config_file:
@@ -59,7 +60,7 @@ def start_payment(request):
     # setup razorpay client this is the client to whome user is paying money that's you
       
     #client = razorpay.Client(auth=(env('PUBLIC_KEY'), env('SECRET_KEY')))
-    client = razorpay.Client(auth=(config['PUBLIC_KEY'], config['SECRET_KEY']))
+    client = razorpay.Client(auth=(os.environ['PUBLIC_KEY'], os.environ['SECRET_KEY']))
     # create razorpay order
     # the amount will come in 'paise' that means if we pass 50 amount will become
     # 0.5 rupees that means 50 paise so we have to convert it in rupees. So, we will 
