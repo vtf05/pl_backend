@@ -124,26 +124,36 @@ class CartViewSet(viewsets.ModelViewSet):
         try :
             
             otp_obj = Otp.objects.get(cart_id = cart.id)
+            mobile_number = request.user.mobile[3:]
+            url = "https://www.fast2sms.com/dev/bulkV2"
+            payload = f"variables_values={str(otp_obj.otp)}&route=otp&numbers={mobile_number}"
+            headers = {
+                'authorization': os.environ['fast_api'],
+                'Content-Type': "application/x-www-form-urlencoded",
+                'Cache-Control': "no-cache",
+                }
+  
+            response = requests.request("POST", url, data=payload, headers=headers)
+            print(response.text)
             message = {'msg': 'otp created successfully','otp':str(otp_obj.otp)}
             # send message using twillio 
-            time.sleep(60)
-            msg = client.messages.create(
-                                    body='Hi there your otp is',
-                                    from_='"+19705332902',
-                                    to='+916265893640'
-                                )
             return Response(message , status=status.HTTP_202_ACCEPTED)
         except   :
             print("i am here")
             otp = otpgen()
             otp_obj = Otp.objects.create(cart = cart, otp = otp)
             message = {'msg': 'otp created successfully','otp':str(otp)}
-            time.sleep(60)
-            msg = client.messages.create(
-                                    body='Hi there your otp is',
-                                    from_='"+19705332902',
-                                    to='+916265893640'
-                                )
+            mobile_number = request.user.mobile[3:]
+            url = "https://www.fast2sms.com/dev/bulkV2"
+            payload = f"variables_values={str(otp)}&route=otp&numbers={mobile_number}"
+            headers = {
+                'authorization': os.environ['fast_api'],
+                'Content-Type': "application/x-www-form-urlencoded",
+                'Cache-Control': "no-cache",
+                }
+  
+            response = requests.request("POST", url, data=payload, headers=headers)
+            print(response.text)
             return Response(message , status=status.HTTP_202_ACCEPTED)
 
 

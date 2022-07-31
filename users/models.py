@@ -9,6 +9,8 @@ from django.conf import settings
 from datetime import date
 from verification.models import phoneModel
 from phonenumber_field.modelfields import PhoneNumberField
+from django.contrib.auth import get_user_model
+
 
 class User(AbstractUser):
     username         = models.CharField( max_length=50 , null= True , blank= True)
@@ -24,4 +26,8 @@ class User(AbstractUser):
     def __str__(self):
         return "{}".format(self.username)    
 
-
+User = get_user_model()
+class UserOtp(models.Model):
+    otp = models.IntegerField(blank = True, null=True)
+    user = models.ForeignKey(User,  on_delete=models.CASCADE)
+    

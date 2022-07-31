@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
-
+from .models import UserOtp
 #  for login in admin pannel one need to enter mobile number starting with their country code 
 
 from .models import User
@@ -35,4 +35,4 @@ class UserAdmin(BaseUserAdmin):
     
     
 admin.site.register(User, UserAdmin)    
-    
+admin.site.register(UserOtp)
