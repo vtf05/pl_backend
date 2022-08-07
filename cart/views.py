@@ -51,13 +51,16 @@ class CartViewSet(viewsets.ModelViewSet):
         item = Item.objects.get(id = item_id)
         try :
             cart_item = cart.items.all().filter(item__id = item_id)
-            if cart_item :
+            print(cart_item)
+            if len(cart_item)>0 :
                 print("this phase run" ,cart_item[0], cart_item[0].count)
                 cart_item[0].count+=1 
+                cart_item[0].save()
             else :
                 print("this phase run 2" ,cart_item)
                 cart_item = CartItem.objects.create(item = item, count=1)
                 cart.items.add(cart_item)
+        
 
         except :
             cart_item = CartItem.objects.create(item = item,count=1)
@@ -103,6 +106,7 @@ class CartViewSet(viewsets.ModelViewSet):
                     cart.items.remove(cart_item[0].id)
                 else :    
                     cart_item[0].count-=1
+                    cart_item[0].save()
         except :
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
