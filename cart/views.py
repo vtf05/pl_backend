@@ -69,7 +69,7 @@ class CartViewSet(viewsets.ModelViewSet):
         item_price  = item.price
         cart.price  = cart.price+item_price
         cart.save()    
-        message = {'msg': 'item added successfully',"cart_price" : str(cart.price) , "cart_size" : str(cart.item_set.count)}    
+        message = {'msg': 'item added successfully',"cart_price" : str(cart.price) , "cart_size" : str(cart.items.all.count)}    
         return Response(message , status=status.HTTP_202_ACCEPTED)
 
 
@@ -111,7 +111,7 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.price  = cart.price-item_price
         
         cart.save()
-        message = {'msg': 'item removed successfully',"cart_price" : str(cart.price) , "cart_size" : str(len(cart.item_set.count))}
+        message = {'msg': 'item removed successfully',"cart_price" : str(cart.price) , "cart_size" : str(cart.items.all.count)}
         return Response(message , status=status.HTTP_202_ACCEPTED)
 
 
