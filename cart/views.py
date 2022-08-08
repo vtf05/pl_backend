@@ -32,7 +32,6 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
     
 
-
 class CartViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Cart.objects.all()
@@ -141,7 +140,7 @@ class CartViewSet(viewsets.ModelViewSet):
             response = requests.request("POST", url, data=payload, headers=headers)
             print(response.text)
             message = {'msg': 'otp created successfully','otp':str(otp_obj.otp)}
-            # send message using twillio 
+            # send message using twilio 
             return Response(message , status=status.HTTP_202_ACCEPTED)
         except   :
             print("i am here")
